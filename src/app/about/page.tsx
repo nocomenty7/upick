@@ -25,7 +25,7 @@ export default function AboutPage() {
   } as const;
 
   return (
-    <div className="relative min-h-[100dvh] w-full max-w-md mx-auto flex flex-col justify-between overflow-x-hidden bg-[#080911] bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.08),_transparent_60%)] text-white font-sans">
+    <div className="relative h-[100dvh] overflow-y-auto w-full max-w-md mx-auto flex flex-col justify-between overflow-x-hidden bg-[#080911] bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.08),_transparent_60%)] text-white font-sans">
       
       {/* Header Bar */}
       <header className="w-full h-14 shrink-0 flex items-center justify-between px-4 border-b border-zinc-900 bg-[#080911]/85 backdrop-blur-md sticky top-0 z-40">
