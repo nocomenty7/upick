@@ -39,31 +39,20 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
   useEffect(() => {
     async function fetchStats() {
       try {
-        const { data, error } = await supabase
-          .from('votes')
-          .select('gender, age_group, selected_option')
-          .eq('question_id', questionId);
+        const { data: statsData, error } = await supabase
+          .from('vote_stats')
+          .select('stats')
+          .eq('question_id', questionId)
+          .single();
 
         if (error) throw error;
 
-        if (!data || data.length === 0) {
-          setStats({
-            gender: {
-              maleA: 0, maleB: 0, maleAPercent: 50.0, maleBPercent: 50.0,
-              femaleA: 0, femaleB: 0, femaleAPercent: 50.0, femaleBPercent: 50.0
-            },
-            ageGroups: [],
-            totalVotes: 0
-          });
-          setLoading(false);
-          return;
-        }
-
-        const totalVotes = data.length;
+        let totalVotes = 0;
         let maleA = 0;
         let maleB = 0;
         let femaleA = 0;
         let femaleB = 0;
+
         const ageMap: Record<string, { A: number; B: number }> = {
           '10대': { A: 0, B: 0 },
           '20대': { A: 0, B: 0 },
@@ -74,19 +63,46 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
           '70대 이상': { A: 0, B: 0 }
         };
 
-        data.forEach((row) => {
-          const isA = row.selected_option === 'A';
-          if (row.gender === '남성') {
-            if (isA) maleA++; else maleB++;
-          } else if (row.gender === '여성') {
-            if (isA) femaleA++; else femaleB++;
-          }
+        if (statsData && statsData.stats) {
+          const statsObj = statsData.stats as Record<string, number>;
+          
+          Object.keys(statsObj).forEach((key) => {
+            const count = Number(statsObj[key]) || 0;
+            totalVotes += count;
 
-          if (ageMap[row.age_group] !== undefined) {
-            if (isA) ageMap[row.age_group].A++;
-            else ageMap[row.age_group].B++;
-          }
-        });
+            const parts = key.split('_');
+            if (parts.length === 3) {
+              const genderVal = parts[0];
+              const ageVal = parts[1];
+              const optionVal = parts[2];
+              const isOptionA = optionVal === 'a';
+
+              if (genderVal === 'male') {
+                if (isOptionA) maleA += count; else maleB += count;
+              } else if (genderVal === 'female') {
+                if (isOptionA) femaleA += count; else femaleB += count;
+              }
+
+              let korAge = '';
+              if (ageVal === '10s') korAge = '10대';
+              else if (ageVal === '20s') korAge = '20대';
+              else if (ageVal === '35s' || ageVal === '30s') korAge = '30대'; // handle edge cases or typos defensively
+              else if (ageVal === '30s') korAge = '30대';
+              else if (ageVal === '40s') korAge = '40대';
+              else if (ageVal === '50s') korAge = '50대';
+              else if (ageVal === '60s') korAge = '60대';
+              else if (ageVal === '70s') korAge = '70대 이상';
+
+              if (korAge && ageMap[korAge]) {
+                if (isOptionA) {
+                  ageMap[korAge].A += count;
+                } else {
+                  ageMap[korAge].B += count;
+                }
+              }
+            }
+          });
+        }
 
         // Compute percentages inside Male / Female demographics
         const maleTotal = maleA + maleB;

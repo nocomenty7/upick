@@ -46,29 +46,26 @@ export default async function Page({ searchParams }: PageProps) {
       } else if (fetchedQuestion) {
         question = fetchedQuestion;
 
-        // Fetch vote counts in parallel
-        const [votesARes, votesBRes] = await Promise.all([
-          supabase
-            .from('votes')
-            .select('*', { count: 'exact', head: true })
-            .eq('question_id', q)
-            .eq('selected_option', 'A'),
-          supabase
-            .from('votes')
-            .select('*', { count: 'exact', head: true })
-            .eq('question_id', q)
-            .eq('selected_option', 'B')
-        ]);
+        // Fetch pre-aggregated vote statistics from vote_stats
+        const { data: statsData, error: statsError } = await supabase
+          .from('vote_stats')
+          .select('stats')
+          .eq('question_id', q)
+          .single();
 
-        if (votesARes.error) {
-          console.error('Error fetching votes A:', votesARes.error);
+        if (statsError) {
+          console.error('Error fetching vote stats:', statsError);
+        } else if (statsData && statsData.stats) {
+          const stats = statsData.stats as Record<string, number>;
+          Object.keys(stats).forEach((key) => {
+            const val = Number(stats[key]) || 0;
+            if (key.endsWith('_a')) {
+              initialVotesA += val;
+            } else if (key.endsWith('_b')) {
+              initialVotesB += val;
+            }
+          });
         }
-        if (votesBRes.error) {
-          console.error('Error fetching votes B:', votesBRes.error);
-        }
-
-        initialVotesA = votesARes.count || 0;
-        initialVotesB = votesBRes.count || 0;
       }
     }
   } catch (err: any) {

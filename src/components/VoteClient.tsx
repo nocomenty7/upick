@@ -111,17 +111,28 @@ export default function VoteClient({
     const gender = userInfo?.gender || '미선택';
     const ageGroup = userInfo?.age_group || '미선택';
 
+    // Map gender and age group to dynamic JSONB keys
+    const genderKey = gender === '여성' ? 'female' : 'male';
+    let ageKey = '20s'; // default
+    if (ageGroup === '10대') ageKey = '10s';
+    else if (ageGroup === '20대') ageKey = '20s';
+    else if (ageGroup === '30대') ageKey = '30s';
+    else if (ageGroup === '40대') ageKey = '40s';
+    else if (ageGroup === '50대') ageKey = '50s';
+    else if (ageGroup === '60대') ageKey = '60s';
+    else if (ageGroup === '70대 이상') ageKey = '70s';
+
+    const optionKey = option.toLowerCase();
+    const statKey = `${genderKey}_${ageKey}_${optionKey}`;
+
     supabase
-      .from('votes')
-      .insert({
-        question_id: question.id,
-        selected_option: option,
-        gender: gender,
-        age_group: ageGroup
+      .rpc('increment_vote_stat', {
+        q_id: question.id,
+        stat_key: statKey
       })
       .then(({ error }) => {
         if (error) {
-          console.error('Background vote logging failed:', error);
+          console.error('Background vote increment failed:', error);
         }
       });
   };
