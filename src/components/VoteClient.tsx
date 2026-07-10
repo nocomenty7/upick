@@ -24,13 +24,15 @@ interface VoteClientProps {
   initialVotesA: number;
   initialVotesB: number;
   allQuestionIds: string[];
+  serverError?: string | null;
 }
 
 export default function VoteClient({
   question,
   initialVotesA,
   initialVotesB,
-  allQuestionIds
+  allQuestionIds,
+  serverError
 }: VoteClientProps) {
   const [userInfo, setUserInfo] = useState<{ gender: string; age_group: string } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -184,12 +186,38 @@ export default function VoteClient({
     }
   };
 
+  if (serverError) {
+    return (
+      <div className="flex h-[100dvh] w-full flex-col items-center justify-center bg-zinc-950 text-white font-sans p-6 text-center">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 max-w-sm">
+          <span className="text-3xl mb-3 block">⚠️</span>
+          <h2 className="text-base font-bold text-red-400 mb-2">데이터 로드 실패</h2>
+          <p className="text-xs text-neutral-400 whitespace-pre-wrap break-all mb-4">
+            {serverError}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-lg bg-white px-4 py-1.5 text-xs font-bold text-zinc-950 transition hover:bg-neutral-250"
+          >
+            새로고침
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!question) {
     return (
-      <div className="flex h-[100dvh] w-full items-center justify-center bg-zinc-950 text-white font-sans">
+      <div className="flex h-[100dvh] w-full flex-col items-center justify-center bg-zinc-950 text-white font-sans p-6 text-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-t-transparent border-neutral-700" />
           <p className="text-sm text-neutral-400">질문을 불러오는 중...</p>
+          {allQuestionIds.length === 0 && (
+            <p className="text-xs text-neutral-500 mt-2 max-w-xs leading-relaxed">
+              등록된 질문 아이디가 0개입니다.<br />
+              Supabase 테이블에 데이터가 등록되어 있는지, 혹은 환경 변수가 맞게 설정되었는지 확인해 주세요.
+            </p>
+          )}
         </div>
       </div>
     );
