@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, MessageSquare, ExternalLink } from 'lucide-react';
+import { X, Copy, Check, MessageSquare, ExternalLink, Image as ImageIcon, Loader2 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 interface ShareSheetProps {
   onClose: () => void;
@@ -12,6 +13,7 @@ interface ShareSheetProps {
 
 export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSheetProps) {
   const [copied, setCopied] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const [showInstaGuide, setShowInstaGuide] = useState(false);
 
   const handleCopyLink = () => {
@@ -19,6 +21,43 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleCaptureImage = () => {
+    if (capturing) return;
+    setCapturing(true);
+
+    // Give a slight delay to allow modal state changes to render, if any
+    setTimeout(() => {
+      const element = document.getElementById('game-capture-area');
+      if (element) {
+        // Enforce temp visible properties for clean rendering
+        html2canvas(element, {
+          useCORS: true,
+          backgroundColor: '#09090b', // Zinc-950 theme background
+          scale: 3, // 3x high resolution for retina displays and crisp text
+          logging: false,
+          allowTaint: true,
+        })
+          .then((canvas) => {
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `BALS-game-result.png`;
+            link.click();
+          })
+          .catch((err) => {
+            console.error('Image export failed:', err);
+            alert('이미지 생성에 실패했습니다. 디바이스의 제한 사항을 확인해 주세요.');
+          })
+          .finally(() => {
+            setCapturing(false);
+          });
+      } else {
+        alert('캡처 영역을 찾을 수 없습니다.');
+        setCapturing(false);
+      }
+    }, 100);
   };
 
   const handleKakaoShare = () => {
@@ -52,12 +91,10 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
 
       if (Kakao) {
         if (!Kakao.isInitialized()) {
-          // Replace this key with your actual Kakao JavaScript key
-          Kakao.init('1234567890abcdef1234567890abcdef'); // placeholder
+          Kakao.init('YOUR_KAKAO_JAVASCRIPT_KEY');
         }
         executeShare();
       } else {
-        // Load Kakao SDK script dynamically
         const script = document.createElement('script');
         script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
         script.integrity = 'sha384-0rrOCpPt419n70x7cdJLT0Imw7476596ib5IaIIHN8XsV21t14d3fR3a79f64798';
@@ -76,7 +113,6 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
   };
 
   const handleInstagramShare = () => {
-    // Copy link automatically so they can use it immediately in the Link sticker
     navigator.clipboard.writeText(shareUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -94,7 +130,7 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-        className="relative z-10 w-full max-w-md rounded-t-3xl bg-neutral-900/98 border-t border-neutral-800 p-6 text-white shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden max-h-[60dvh]"
+        className="relative z-10 w-full max-w-md rounded-t-3xl bg-neutral-900/98 border-t border-neutral-800 p-6 text-white shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden max-h-[70dvh]"
       >
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-neutral-700 cursor-pointer shrink-0" onClick={onClose} />
 
@@ -110,6 +146,25 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
 
         {/* Buttons List */}
         <div className="space-y-3 pb-6 flex-1 overflow-y-auto min-h-0 pr-1">
+          {/* Capture Image Button */}
+          <button
+            onClick={handleCaptureImage}
+            disabled={capturing}
+            className="flex w-full items-center gap-3 rounded-2xl bg-zinc-800 border border-zinc-750 hover:bg-zinc-750 text-neutral-200 font-extrabold p-4 transition-all shadow-md text-sm disabled:opacity-50"
+          >
+            {capturing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
+                <span>이미지 파일 생성 중...</span>
+              </>
+            ) : (
+              <>
+                <ImageIcon className="h-5 w-5 text-neutral-300" />
+                <span>결과 화면 이미지로 저장하기</span>
+              </>
+            )}
+          </button>
+
           {/* Kakao Talk button */}
           <button
             onClick={handleKakaoShare}
@@ -155,7 +210,7 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
             <ExternalLink className="h-4 w-4 text-neutral-500" />
           </button>
 
-          {/* Instgram Story Sharing Guidance Dialog */}
+          {/* Instagram Story Sharing Guidance Dialog */}
           <AnimatePresence>
             {showInstaGuide && (
               <motion.div
@@ -172,10 +227,10 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
                   1. 게임 링크가 클립보드에 **자동으로 복사**되었습니다.
                 </p>
                 <p>
-                  2. 인스타그램 앱을 켜고 스토리를 생성한 뒤, 상단 스티커 메뉴에서 **'링크' 스티커**를 선택해 주세요.
+                  2. 위의 **[결과 화면 이미지로 저장하기]** 버튼을 눌러 결과 캡처 이미지를 갤러리에 저장해 보세요.
                 </p>
                 <p>
-                  3. 복사된 링크를 붙여넣고 스토리를 업로드하여 친구들과 밸런스 게임을 공유하세요!
+                  3. 인스타그램 스토리에 결과 이미지를 올리고 **'링크' 스티커** 기능을 사용해 복사된 링크를 붙여넣어 함께 공유하면 효과적입니다!
                 </p>
                 <button
                   onClick={() => setShowInstaGuide(false)}

@@ -12,15 +12,22 @@ interface StatsBottomSheetProps {
 
 interface VoteStats {
   gender: {
-    male: number;
-    female: number;
-    malePercent: number;
-    femalePercent: number;
+    maleA: number;
+    maleB: number;
+    maleAPercent: number;
+    maleBPercent: number;
+    femaleA: number;
+    femaleB: number;
+    femaleAPercent: number;
+    femaleBPercent: number;
   };
   ageGroups: {
     name: string;
-    count: number;
-    percent: number;
+    countA: number;
+    countB: number;
+    percentA: number;
+    percentB: number;
+    total: number;
   }[];
   totalVotes: number;
 }
@@ -30,25 +37,21 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
   const [stats, setStats] = useState<VoteStats | null>(null);
 
   useEffect(() => {
-    try {
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (e) {
-      console.error("AdSense trigger failed inside stats bottom sheet: ", e);
-    }
-
     async function fetchStats() {
       try {
         const { data, error } = await supabase
           .from('votes')
-          .select('gender, age_group')
+          .select('gender, age_group, selected_option')
           .eq('question_id', questionId);
 
         if (error) throw error;
 
         if (!data || data.length === 0) {
           setStats({
-            gender: { male: 0, female: 0, malePercent: 50.0, femalePercent: 50.0 },
+            gender: {
+              maleA: 0, maleB: 0, maleAPercent: 50.0, maleBPercent: 50.0,
+              femaleA: 0, femaleB: 0, femaleAPercent: 50.0, femaleBPercent: 50.0
+            },
             ageGroups: [],
             totalVotes: 0
           });
@@ -57,32 +60,66 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
         }
 
         const totalVotes = data.length;
-        let male = 0;
-        let female = 0;
-        const ageMap: Record<string, number> = {
-          '10대': 0, '20대': 0, '30대': 0, '40대': 0, '50대': 0, '60대': 0, '70대 이상': 0
+        let maleA = 0;
+        let maleB = 0;
+        let femaleA = 0;
+        let femaleB = 0;
+        const ageMap: Record<string, { A: number; B: number }> = {
+          '10대': { A: 0, B: 0 },
+          '20대': { A: 0, B: 0 },
+          '30대': { A: 0, B: 0 },
+          '40대': { A: 0, B: 0 },
+          '50대': { A: 0, B: 0 },
+          '60대': { A: 0, B: 0 },
+          '70대 이상': { A: 0, B: 0 }
         };
 
         data.forEach((row) => {
-          if (row.gender === '남성') male++;
-          else if (row.gender === '여성') female++;
+          const isA = row.selected_option === 'A';
+          if (row.gender === '남성') {
+            if (isA) maleA++; else maleB++;
+          } else if (row.gender === '여성') {
+            if (isA) femaleA++; else femaleB++;
+          }
 
           if (ageMap[row.age_group] !== undefined) {
-            ageMap[row.age_group]++;
+            if (isA) ageMap[row.age_group].A++;
+            else ageMap[row.age_group].B++;
           }
         });
 
-        const malePercent = totalVotes > 0 ? Number(((male / totalVotes) * 100).toFixed(1)) : 50.0;
-        const femalePercent = Number((100 - malePercent).toFixed(1));
+        // Compute percentages inside Male / Female demographics
+        const maleTotal = maleA + maleB;
+        const maleAPercent = maleTotal > 0 ? Number(((maleA / maleTotal) * 100).toFixed(1)) : 50.0;
+        const maleBPercent = maleTotal > 0 ? Number((100 - maleAPercent).toFixed(1)) : 50.0;
 
-        const ageGroups = Object.keys(ageMap).map((key) => ({
-          name: key,
-          count: ageMap[key],
-          percent: totalVotes > 0 ? Number(((ageMap[key] / totalVotes) * 100).toFixed(1)) : 0.0
-        }));
+        const femaleTotal = femaleA + femaleB;
+        const femaleAPercent = femaleTotal > 0 ? Number(((femaleA / femaleTotal) * 100).toFixed(1)) : 50.0;
+        const femaleBPercent = femaleTotal > 0 ? Number((100 - femaleAPercent).toFixed(1)) : 50.0;
+
+        // Compute percentages per age group
+        const ageGroups = Object.keys(ageMap).map((key) => {
+          const a = ageMap[key].A;
+          const b = ageMap[key].B;
+          const totalAge = a + b;
+          const percentA = totalAge > 0 ? Number(((a / totalAge) * 100).toFixed(1)) : 50.0;
+          const percentB = totalAge > 0 ? Number((100 - percentA).toFixed(1)) : 50.0;
+
+          return {
+            name: key,
+            countA: a,
+            countB: b,
+            percentA,
+            percentB,
+            total: totalAge
+          };
+        });
 
         setStats({
-          gender: { male, female, malePercent, femalePercent },
+          gender: {
+            maleA, maleB, maleAPercent, maleBPercent,
+            femaleA, femaleB, femaleAPercent, femaleBPercent
+          },
           ageGroups,
           totalVotes
         });
@@ -140,55 +177,105 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
               <span className="text-sm text-neutral-400 font-semibold"> 명 투표 완료</span>
             </div>
 
-            {/* Gender Breakdown */}
-            <div className="space-y-3">
+            {/* Gender Breakdown (Option A vs Option B ratio per gender) */}
+            <div className="space-y-4">
               <h4 className="text-base font-extrabold text-neutral-200 flex items-center gap-2">
-                <PieChart className="h-5 w-5 text-neutral-400" /> 성별 비율
+                <PieChart className="h-5 w-5 text-neutral-400" /> 성별 선택 비율
               </h4>
               
-              <div className="flex justify-between items-center text-sm font-black px-1">
-                <span className="text-sky-400">🙋‍♂️ 남성 {stats.gender.malePercent.toFixed(1)}%</span>
-                <span className="text-rose-400">🙋‍♀️ 여성 {stats.gender.femalePercent.toFixed(1)}%</span>
-              </div>
+              <div className="space-y-4 bg-neutral-850/30 border border-neutral-850 p-4 rounded-2xl">
+                {/* 1. Male Breakdown */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center text-xs font-bold px-1">
+                    <span className="text-neutral-300 font-extrabold text-sm">🙋‍♂️ 남성 통계</span>
+                    {stats.gender.maleA + stats.gender.maleB > 0 ? (
+                      <div className="space-x-1.5">
+                        <span className="text-amber-400">A선택 {stats.gender.maleAPercent}%</span>
+                        <span className="text-neutral-600">|</span>
+                        <span className="text-emerald-400">B선택 {stats.gender.maleBPercent}%</span>
+                      </div>
+                    ) : (
+                      <span className="text-neutral-500 text-xs font-medium">참여한 남성 없음</span>
+                    )}
+                  </div>
 
-              <div className="relative flex h-3.5 w-full overflow-hidden rounded-full bg-zinc-800 shadow-inner">
-                {stats.gender.malePercent > 0 && (
-                  <div
-                    style={{ width: `${stats.gender.malePercent}%` }}
-                    className="h-full bg-sky-500/80 transition-all duration-500"
-                  />
-                )}
-                {stats.gender.femalePercent > 0 && (
-                  <div
-                    style={{ width: `${stats.gender.femalePercent}%` }}
-                    className="h-full bg-rose-500/80 transition-all duration-500"
-                  />
-                )}
+                  <div className="relative flex h-3.5 w-full overflow-hidden rounded-full bg-zinc-800 shadow-inner">
+                    {stats.gender.maleA + stats.gender.maleB > 0 ? (
+                      <>
+                        <div style={{ width: `${stats.gender.maleAPercent}%` }} className="h-full bg-amber-500/80" />
+                        <div style={{ width: `${stats.gender.maleBPercent}%` }} className="h-full bg-emerald-500/80" />
+                      </>
+                    ) : (
+                      <div className="h-full w-full bg-zinc-850" />
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Female Breakdown */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center text-xs font-bold px-1">
+                    <span className="text-neutral-300 font-extrabold text-sm">🙋‍♀️ 여성 통계</span>
+                    {stats.gender.femaleA + stats.gender.femaleB > 0 ? (
+                      <div className="space-x-1.5">
+                        <span className="text-amber-400">A선택 {stats.gender.femaleAPercent}%</span>
+                        <span className="text-neutral-600">|</span>
+                        <span className="text-emerald-400">B선택 {stats.gender.femaleBPercent}%</span>
+                      </div>
+                    ) : (
+                      <span className="text-neutral-500 text-xs font-medium">참여한 여성 없음</span>
+                    )}
+                  </div>
+
+                  <div className="relative flex h-3.5 w-full overflow-hidden rounded-full bg-zinc-800 shadow-inner">
+                    {stats.gender.femaleA + stats.gender.femaleB > 0 ? (
+                      <>
+                        <div style={{ width: `${stats.gender.femaleAPercent}%` }} className="h-full bg-amber-500/80" />
+                        <div style={{ width: `${stats.gender.femaleBPercent}%` }} className="h-full bg-emerald-500/80" />
+                      </>
+                    ) : (
+                      <div className="h-full w-full bg-zinc-850" />
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Age Group Breakdown */}
+            {/* Age Group Breakdown (Option A vs Option B ratio per age group) */}
             <div className="space-y-4">
               <h4 className="text-base font-extrabold text-neutral-200 flex items-center gap-2">
-                <BarChart className="h-5 w-5 text-neutral-400" /> 연령별 비율
+                <BarChart className="h-5 w-5 text-neutral-400" /> 연령별 선택 비율
               </h4>
               <div className="space-y-3 bg-neutral-850/40 border border-neutral-850 p-4 rounded-2xl">
                 {stats.ageGroups.map((group) => (
-                  <div key={group.name} className="flex items-center gap-3 text-sm">
-                    <span className="w-16 text-neutral-300 font-extrabold">{group.name}</span>
-                    <div className="flex-1 h-2.5 bg-neutral-800 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${group.percent}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                        className="h-full bg-neutral-200 rounded-full"
-                      />
+                  <div key={group.name} className="flex flex-col gap-1.5 text-sm">
+                    <div className="flex justify-between items-center px-0.5">
+                      <span className="text-neutral-300 font-extrabold text-xs">{group.name}</span>
+                      {group.total > 0 ? (
+                        <div className="text-[11px] font-bold space-x-1.5">
+                          <span className="text-amber-400">A {group.percentA}%</span>
+                          <span className="text-zinc-700">/</span>
+                          <span className="text-emerald-400">B {group.percentB}%</span>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-600 text-[10px] font-medium">투표 없음</span>
+                      )}
                     </div>
-                    <span className="w-12 text-right font-black text-neutral-100">{group.percent.toFixed(1)}%</span>
+
+                    <div className="relative flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-800 shadow-inner">
+                      {group.total > 0 ? (
+                        <>
+                          <div style={{ width: `${group.percentA}%` }} className="h-full bg-amber-500/75" />
+                          <div style={{ width: `${group.percentB}%` }} className="h-full bg-emerald-500/75" />
+                        </>
+                      ) : (
+                        <div className="h-full w-full bg-zinc-850" />
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
+
           </div>
         ) : (
           <div className="text-center py-10 text-neutral-500 font-bold flex-1">통계 데이터를 불러올 수 없습니다.</div>

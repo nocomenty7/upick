@@ -181,7 +181,7 @@ export default function VoteClient({
     );
   }
 
-  // Witty completion screen when all questions have been voted on (Top Ad removed)
+  // Witty completion screen when all questions have been voted on
   if (noMoreQuestions) {
     return (
       <div className="relative flex h-[100dvh] w-full max-w-md mx-auto flex-col justify-between overflow-hidden bg-zinc-950 text-white font-sans">
@@ -259,7 +259,7 @@ export default function VoteClient({
   return (
     <div className="relative flex h-[100dvh] w-full max-w-md mx-auto flex-col justify-between overflow-hidden bg-zinc-950 text-white font-sans select-none">
       
-      {/* 2. Top Navigation Bar (AdSense top removed, Logo removed, Only category, maximized spacing) */}
+      {/* 2. Top Navigation Bar */}
       <header className="flex items-center justify-center py-4 shrink-0 bg-zinc-950/20">
         {question.category && (
           <span className="inline-block rounded-full bg-zinc-900 px-3 py-1 text-xs font-bold text-zinc-400 tracking-widest uppercase border border-zinc-850">
@@ -271,138 +271,158 @@ export default function VoteClient({
       {/* 3. Main Dynamic Content Area (Expanded to occupy maximal vertical height) */}
       <main className="flex-1 flex flex-col min-h-0 px-4 py-4 justify-between">
         
-        {/* Question Title Header - Large & Bold */}
-        <div className="text-center py-3 shrink-0">
-          <h1 className="text-2xl md:text-3xl font-extrabold leading-snug text-neutral-100 tracking-tight whitespace-pre-line px-2">
-            {question.title}
-          </h1>
-        </div>
-
-        {/* Voting Stack Container (Takes maximum screen space) */}
-        <div className="flex-grow flex flex-col gap-4 min-h-0 my-3 relative">
+        {/* Game Capture Area (Captured for Image Export) */}
+        <div id="game-capture-area" className="flex flex-col bg-zinc-950 p-4 rounded-3xl border border-zinc-900 gap-4 flex-1 min-h-0">
           
-          {/* Card Option A (Top) */}
-          <motion.button
-            layout
-            transition={{ type: 'spring', damping: 20, stiffness: 150 }}
-            style={{ flexGrow: hasVoted ? displayGrowA : 50 }}
-            whileTap={{ scale: hasVoted ? 1 : 0.98 }}
-            onClick={() => handleVote('A')}
-            disabled={hasVoted}
-            className={`relative flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl py-4 px-5 transition-all duration-300 text-left border ${
-              hasVoted
-                ? selectedOption === 'A'
-                  ? 'bg-zinc-900/90 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
-                  : 'bg-zinc-950/40 border-zinc-900/80 opacity-60'
-                : 'bg-zinc-900/50 border-zinc-800/80 hover:bg-zinc-900/80 hover:border-zinc-700'
-            }`}
-          >
-            {/* Absolute Percentage Fill Animation */}
-            {hasVoted && (
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className={`absolute inset-0 z-0 opacity-10 ${
-                  selectedOption === 'A' ? 'bg-amber-500' : 'bg-neutral-400'
-                }`}
-                style={{ width: `${percentA}%`, transformOrigin: 'left' }}
-              />
-            )}
+          {/* Question Title Header - Large & Bold inside capture block */}
+          <div className="text-center py-1 shrink-0">
+            <h1 className="text-2xl md:text-3xl font-extrabold leading-snug text-neutral-100 tracking-tight whitespace-pre-line px-2">
+              {question.title}
+            </h1>
+          </div>
 
-            <div className="relative z-10 flex flex-col items-center text-center w-full max-w-xs pointer-events-none">
-              <div className="flex items-center gap-2 mb-1.5 justify-center">
-                {question.emoji_a && (
-                  <span className="text-2xl leading-none">{question.emoji_a}</span>
-                )}
+          {/* Voting Stack Container */}
+          <div className="flex-grow flex flex-col gap-4 min-h-0 relative">
+            
+            {/* Card Option A (Top) */}
+            <motion.button
+              layout
+              transition={{ type: 'spring', damping: 11, stiffness: 90 }}
+              style={{ flexGrow: hasVoted ? displayGrowA : 50 }}
+              whileTap={{ scale: hasVoted ? 1 : 0.98 }}
+              onClick={() => handleVote('A')}
+              disabled={hasVoted}
+              className={`relative flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl py-4 px-5 transition-all duration-300 text-left border ${
+                hasVoted
+                  ? selectedOption === 'A'
+                    ? 'bg-zinc-900/90 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+                    : 'bg-zinc-950/40 border-zinc-900/80 opacity-60'
+                  : 'bg-zinc-900/50 border-zinc-800/80 hover:bg-zinc-900/80 hover:border-zinc-700'
+              }`}
+            >
+              {/* Checkmark indicator for selected card */}
+              {hasVoted && selectedOption === 'A' && (
+                <div className="absolute top-3 right-3 z-20 flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-extrabold text-zinc-950 shadow-md">
+                  <span>✓</span>
+                  <span>내가 선택</span>
+                </div>
+              )}
+
+              {/* Absolute Percentage Fill Animation */}
+              {hasVoted && (
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  className={`absolute inset-0 z-0 opacity-10 ${
+                    selectedOption === 'A' ? 'bg-amber-500' : 'bg-neutral-400'
+                  }`}
+                  style={{ width: `${percentA}%`, transformOrigin: 'left' }}
+                />
+              )}
+
+              <div className="relative z-10 flex flex-col items-center text-center w-full max-w-xs pointer-events-none">
+                <div className="flex items-center gap-2 mb-1.5 justify-center">
+                  {question.emoji_a && (
+                    <span className="text-2xl leading-none">{question.emoji_a}</span>
+                  )}
+                </div>
+                
+                <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-24 overflow-y-auto">
+                  {question.option_a}
+                </p>
+
+                {/* Dynamic Vote Results (1 Decimal Place) */}
+                <AnimatePresence>
+                  {hasVoted && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ type: 'spring', damping: 15 }}
+                      className="mt-1"
+                    >
+                      <span className="text-4xl md:text-5xl font-black text-amber-400">{percentA.toFixed(1)}%</span>
+                      <span className="text-xs text-neutral-500 block font-semibold mt-0.5">
+                        {votesA.toLocaleString()}명 선택
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              
-              <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-24 overflow-y-auto">
-                {question.option_a}
-              </p>
+            </motion.button>
 
-              {/* Dynamic Vote Results (1 Decimal Place) */}
-              <AnimatePresence>
-                {hasVoted && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ type: 'spring', damping: 15 }}
-                    className="mt-1"
-                  >
-                    <span className="text-4xl md:text-5xl font-black text-amber-400">{percentA.toFixed(1)}%</span>
-                    <span className="text-xs text-neutral-500 block font-semibold mt-0.5">
-                      {votesA.toLocaleString()}명 선택
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.button>
+            {/* Card Option B (Bottom) */}
+            <motion.button
+              layout
+              transition={{ type: 'spring', damping: 11, stiffness: 90 }}
+              style={{ flexGrow: hasVoted ? displayGrowB : 50 }}
+              whileTap={{ scale: hasVoted ? 1 : 0.98 }}
+              onClick={() => handleVote('B')}
+              disabled={hasVoted}
+              className={`relative flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl py-4 px-5 transition-all duration-300 text-left border ${
+                hasVoted
+                  ? selectedOption === 'B'
+                    ? 'bg-zinc-900/90 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                    : 'bg-zinc-950/40 border-zinc-900/80 opacity-60'
+                  : 'bg-zinc-900/50 border-zinc-800/80 hover:bg-zinc-900/80 hover:border-zinc-700'
+              }`}
+            >
+              {/* Checkmark indicator for selected card */}
+              {hasVoted && selectedOption === 'B' && (
+                <div className="absolute top-3 right-3 z-20 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-extrabold text-zinc-950 shadow-md">
+                  <span>✓</span>
+                  <span>내가 선택</span>
+                </div>
+              )}
 
-          {/* Card Option B (Bottom) */}
-          <motion.button
-            layout
-            transition={{ type: 'spring', damping: 20, stiffness: 150 }}
-            style={{ flexGrow: hasVoted ? displayGrowB : 50 }}
-            whileTap={{ scale: hasVoted ? 1 : 0.98 }}
-            onClick={() => handleVote('B')}
-            disabled={hasVoted}
-            className={`relative flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl py-4 px-5 transition-all duration-300 text-left border ${
-              hasVoted
-                ? selectedOption === 'B'
-                  ? 'bg-zinc-900/90 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                  : 'bg-zinc-950/40 border-zinc-900/80 opacity-60'
-                : 'bg-zinc-900/50 border-zinc-800/80 hover:bg-zinc-900/80 hover:border-zinc-700'
-            }`}
-          >
-            {/* Absolute Percentage Fill Animation */}
-            {hasVoted && (
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className={`absolute inset-0 z-0 opacity-10 ${
-                  selectedOption === 'B' ? 'bg-emerald-500' : 'bg-neutral-400'
-                }`}
-                style={{ width: `${percentB}%`, transformOrigin: 'left' }}
-              />
-            )}
+              {/* Absolute Percentage Fill Animation */}
+              {hasVoted && (
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  className={`absolute inset-0 z-0 opacity-10 ${
+                    selectedOption === 'B' ? 'bg-emerald-500' : 'bg-neutral-400'
+                  }`}
+                  style={{ width: `${percentB}%`, transformOrigin: 'left' }}
+                />
+              )}
 
-            <div className="relative z-10 flex flex-col items-center text-center w-full max-w-xs pointer-events-none">
-              <div className="flex items-center gap-2 mb-1.5 justify-center">
-                {question.emoji_b && (
-                  <span className="text-2xl leading-none">{question.emoji_b}</span>
-                )}
+              <div className="relative z-10 flex flex-col items-center text-center w-full max-w-xs pointer-events-none">
+                <div className="flex items-center gap-2 mb-1.5 justify-center">
+                  {question.emoji_b && (
+                    <span className="text-2xl leading-none">{question.emoji_b}</span>
+                  )}
+                </div>
+
+                <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-24 overflow-y-auto">
+                  {question.option_b}
+                </p>
+
+                {/* Dynamic Vote Results (1 Decimal Place) */}
+                <AnimatePresence>
+                  {hasVoted && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ type: 'spring', damping: 15 }}
+                      className="mt-1"
+                    >
+                      <span className="text-4xl md:text-5xl font-black text-emerald-400">{percentB.toFixed(1)}%</span>
+                      <span className="text-xs text-neutral-500 block font-semibold mt-0.5">
+                        {votesB.toLocaleString()}명 선택
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+            </motion.button>
 
-              <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-24 overflow-y-auto">
-                {question.option_b}
-              </p>
-
-              {/* Dynamic Vote Results (1 Decimal Place) */}
-              <AnimatePresence>
-                {hasVoted && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ type: 'spring', damping: 15 }}
-                    className="mt-1"
-                  >
-                    <span className="text-4xl md:text-5xl font-black text-emerald-400">{percentB.toFixed(1)}%</span>
-                    <span className="text-xs text-neutral-500 block font-semibold mt-0.5">
-                      {votesB.toLocaleString()}명 선택
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.button>
-
+          </div>
         </div>
 
         {/* Action Controls & Navigation (Post-Vote) */}
-        <div className="h-16 shrink-0 flex items-center justify-between gap-3 mt-2">
+        <div className="h-16 shrink-0 flex items-center justify-between gap-3 mt-3">
           {hasVoted ? (
             <>
               <motion.button
@@ -446,7 +466,7 @@ export default function VoteClient({
 
       </main>
 
-      {/* Tiny Legal Footer (Pushed to the very bottom above bottom AdSlot) */}
+      {/* Tiny Legal Footer */}
       <div className="text-[10px] text-center text-zinc-650 flex justify-center gap-3 py-2.5 border-t border-zinc-900/40 shrink-0">
         <Link href="/privacy" className="hover:text-zinc-400 hover:underline">개인정보처리방침</Link>
         <span>|</span>
