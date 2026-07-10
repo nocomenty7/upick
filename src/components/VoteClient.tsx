@@ -25,7 +25,7 @@ interface VoteClientProps {
   question: Question | null;
   initialVotesA: number;
   initialVotesB: number;
-  allQuestionIds: string[];
+  allQuestions: { id: string; question_no: number }[];
   serverError?: string | null;
 }
 
@@ -33,7 +33,7 @@ export default function VoteClient({
   question,
   initialVotesA,
   initialVotesB,
-  allQuestionIds,
+  allQuestions,
   serverError
 }: VoteClientProps) {
   const [userInfo, setUserInfo] = useState<{ gender: string; age_group: string } | null>(null);
@@ -88,12 +88,12 @@ export default function VoteClient({
       if (votedList.includes(question.id)) {
         setHasVoted(true);
       }
-    } else if (allQuestionIds.length > 0) {
-      const unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id));
+    } else if (allQuestions.length > 0) {
+      const unvoted = allQuestions.filter((q) => !votedList.includes(q.id));
       
-      if (unvotedIds.length > 0) {
-        const randomId = unvotedIds[Math.floor(Math.random() * unvotedIds.length)];
-        router.replace(`/?q=${randomId}`);
+      if (unvoted.length > 0) {
+        const randomQuestion = unvoted[Math.floor(Math.random() * unvoted.length)];
+        router.replace(`/?q=${randomQuestion.question_no}`);
       } else {
         // All questions completed! Show custom witty screen
         setNoMoreQuestions(true);
@@ -106,7 +106,7 @@ export default function VoteClient({
     } catch (e) {
       // Ads fail gracefully
     }
-  }, [question, allQuestionIds]);
+  }, [question, allQuestions]);
   const handleOnboardingComplete = (data: { gender: string; age_group: string }) => {
     localStorage.setItem('upick_user_info', JSON.stringify(data));
     setUserInfo(data);
@@ -115,17 +115,17 @@ export default function VoteClient({
 
   // 1.5. Prefetch next question in background once voted
   useEffect(() => {
-    if (!hasVoted || !question || allQuestionIds.length === 0) return;
+    if (!hasVoted || !question || allQuestions.length === 0) return;
 
     const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
-    const unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id) && id !== question.id);
+    const unvoted = allQuestions.filter((q) => !votedList.includes(q.id) && q.id !== question.id);
 
-    if (unvotedIds.length > 0) {
-      const randomNextId = unvotedIds[Math.floor(Math.random() * unvotedIds.length)];
-      setNextPrefetchedId(randomNextId);
-      router.prefetch(`/?q=${randomNextId}`);
+    if (unvoted.length > 0) {
+      const randomNext = unvoted[Math.floor(Math.random() * unvoted.length)];
+      setNextPrefetchedId(randomNext.question_no.toString());
+      router.prefetch(`/?q=${randomNext.question_no}`);
     }
-  }, [hasVoted, question, allQuestionIds, router]);
+  }, [hasVoted, question, allQuestions, router]);
 
   // 2. Zero-Latency Optimistic Voting
   const handleVote = async (option: 'A' | 'B') => {
@@ -183,15 +183,11 @@ export default function VoteClient({
       router.replace(`/?q=${nextPrefetchedId}`);
     } else {
       const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
-      let unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id));
+      const unvoted = allQuestions.filter((q) => !votedList.includes(q.id) && (!question || q.id !== question.id));
 
-      if (question) {
-        unvotedIds = unvotedIds.filter((id) => id !== question.id);
-      }
-
-      if (unvotedIds.length > 0) {
-        const nextId = unvotedIds[Math.floor(Math.random() * unvotedIds.length)];
-        router.replace(`/?q=${nextId}`);
+      if (unvoted.length > 0) {
+        const nextQuestion = unvoted[Math.floor(Math.random() * unvoted.length)];
+        router.replace(`/?q=${nextQuestion.question_no}`);
       } else {
         // Redirect to root, triggering the no-more-questions screen
         router.replace('/');
@@ -687,7 +683,7 @@ export default function VoteClient({
         {showShareSheet && question && (
           <ShareSheet
             onClose={() => setShowShareSheet(false)}
-            shareUrl={`${window.location.origin}/?q=${question.id}`}
+            shareUrl={`${window.location.origin}/?q=${question.question_no}`}
             questionTitle={question.title}
           />
         )}

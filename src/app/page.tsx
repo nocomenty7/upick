@@ -15,30 +15,36 @@ export default async function Page({ searchParams }: PageProps) {
   let question = null;
   let initialVotesA = 0;
   let initialVotesB = 0;
-  let allQuestionIds: string[] = [];
+  let allQuestionsList: { id: string; question_no: number }[] = [];
   let errorMsg: string | null = null;
 
   try {
-    // 1. Fetch all available question IDs from Supabase for navigation
+    // 1. Fetch all available question IDs and question_no for navigation
     const { data: allQuestions, error: allError } = await supabase
       .from('questions')
-      .select('id')
+      .select('id, question_no')
       .order('question_no', { ascending: true });
     
     if (allError) {
       errorMsg = `질문 목록 로드 실패: ${allError.message} (코드: ${allError.code})`;
       console.error('Error fetching questions list:', allError);
     } else if (allQuestions) {
-      allQuestionIds = allQuestions.map((item) => item.id);
+      allQuestionsList = allQuestions;
     }
 
-    // 2. If a query id is provided, load details and statistics
+    // 2. If a query value is provided, load details and statistics
     if (q && !errorMsg) {
-      const { data: fetchedQuestion, error: qError } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('id', q)
-        .single();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q);
+      
+      let query = supabase.from('questions').select('*');
+      if (isUuid) {
+        query = query.eq('id', q);
+      } else {
+        const num = parseInt(q, 10);
+        query = query.eq('question_no', isNaN(num) ? -1 : num);
+      }
+
+      const { data: fetchedQuestion, error: qError } = await query.maybeSingle();
 
       if (qError) {
         errorMsg = `개별 질문 로드 실패 (?q=${q}): ${qError.message} (코드: ${qError.code})`;
@@ -50,7 +56,7 @@ export default async function Page({ searchParams }: PageProps) {
         const { data: statsData, error: statsError } = await supabase
           .from('vote_stats')
           .select('stats')
-          .eq('question_id', q)
+          .eq('question_id', fetchedQuestion.id)
           .maybeSingle();
 
         if (statsError) {
@@ -79,7 +85,7 @@ export default async function Page({ searchParams }: PageProps) {
       question={question}
       initialVotesA={initialVotesA}
       initialVotesB={initialVotesB}
-      allQuestionIds={allQuestionIds}
+      allQuestions={allQuestionsList}
       serverError={errorMsg}
     />
   );
