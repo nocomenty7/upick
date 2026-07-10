@@ -75,6 +75,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <VoteClient
+      key={question?.id || 'empty'}
       question={question}
       initialVotesA={initialVotesA}
       initialVotesB={initialVotesB}

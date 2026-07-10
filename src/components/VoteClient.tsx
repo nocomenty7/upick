@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart3, ChevronRight, Share2, Trophy, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import OnboardingModal from './OnboardingModal';
 import StatsBottomSheet from './StatsBottomSheet';
@@ -47,6 +48,8 @@ export default function VoteClient({
   const [noMoreQuestions, setNoMoreQuestions] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
   const [lastMenuClickTime, setLastMenuClickTime] = useState<number>(0);
+  const router = useRouter();
+  const [nextPrefetchedId, setNextPrefetchedId] = useState<string | null>(null);
 
   const handleMenuResetClick = () => {
     const now = Date.now();
@@ -90,7 +93,7 @@ export default function VoteClient({
       
       if (unvotedIds.length > 0) {
         const randomId = unvotedIds[Math.floor(Math.random() * unvotedIds.length)];
-        window.location.href = `/?q=${randomId}`;
+        router.replace(`/?q=${randomId}`);
       } else {
         // All questions completed! Show custom witty screen
         setNoMoreQuestions(true);
@@ -104,12 +107,25 @@ export default function VoteClient({
       // Ads fail gracefully
     }
   }, [question, allQuestionIds]);
-
   const handleOnboardingComplete = (data: { gender: string; age_group: string }) => {
     localStorage.setItem('upick_user_info', JSON.stringify(data));
     setUserInfo(data);
     setShowOnboarding(false);
   };
+
+  // 1.5. Prefetch next question in background once voted
+  useEffect(() => {
+    if (!hasVoted || !question || allQuestionIds.length === 0) return;
+
+    const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
+    const unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id) && id !== question.id);
+
+    if (unvotedIds.length > 0) {
+      const randomNextId = unvotedIds[Math.floor(Math.random() * unvotedIds.length)];
+      setNextPrefetchedId(randomNextId);
+      router.prefetch(`/?q=${randomNextId}`);
+    }
+  }, [hasVoted, question, allQuestionIds, router]);
 
   // 2. Zero-Latency Optimistic Voting
   const handleVote = async (option: 'A' | 'B') => {
@@ -158,24 +174,28 @@ export default function VoteClient({
       });
   };
 
-  // 3. Maximizing PV with window.location.href (Filters already-voted questions strictly)
+  // 3. Next.js router.replace client-side navigation with Prefetching for instant transitions
   const handleNextQuestion = () => {
     if (redirecting) return;
     setRedirecting(true);
 
-    const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
-    let unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id));
-
-    if (question) {
-      unvotedIds = unvotedIds.filter((id) => id !== question.id);
-    }
-
-    if (unvotedIds.length > 0) {
-      const nextId = unvotedIds[Math.floor(Math.random() * unvotedIds.length)];
-      window.location.href = `/?q=${nextId}`;
+    if (nextPrefetchedId) {
+      router.replace(`/?q=${nextPrefetchedId}`);
     } else {
-      // Redirect to root, triggering the no-more-questions screen
-      window.location.href = '/';
+      const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
+      let unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id));
+
+      if (question) {
+        unvotedIds = unvotedIds.filter((id) => id !== question.id);
+      }
+
+      if (unvotedIds.length > 0) {
+        const nextId = unvotedIds[Math.floor(Math.random() * unvotedIds.length)];
+        router.replace(`/?q=${nextId}`);
+      } else {
+        // Redirect to root, triggering the no-more-questions screen
+        router.replace('/');
+      }
     }
   };
 
