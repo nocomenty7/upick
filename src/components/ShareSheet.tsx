@@ -43,7 +43,7 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
             const dataUrl = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = dataUrl;
-            link.download = `BALS-game-result.png`;
+            link.download = `UPICK-game-result.png`;
             link.click();
           })
           .catch((err) => {
@@ -69,7 +69,7 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
         window.Kakao.Share.sendDefault({
           objectType: 'feed',
           content: {
-            title: 'BALS - 모두의 밸런스게임',
+            title: 'UPICK - 모두의 밸런스게임',
             description: questionTitle,
             imageUrl: `${window.location.origin}/logo.jpg`,
             link: {

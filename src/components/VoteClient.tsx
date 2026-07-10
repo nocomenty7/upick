@@ -49,14 +49,14 @@ export default function VoteClient({
 
   // 1. Initial configuration check (Demographics & Voted History)
   useEffect(() => {
-    const storedUser = localStorage.getItem('bals_user_info');
+    const storedUser = localStorage.getItem('upick_user_info');
     if (storedUser) {
       setUserInfo(JSON.parse(storedUser));
     } else {
       setShowOnboarding(true);
     }
 
-    const votedList = JSON.parse(localStorage.getItem('bals_voted_questions') || '[]');
+    const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
     
     if (question) {
       if (votedList.includes(question.id)) {
@@ -83,7 +83,7 @@ export default function VoteClient({
   }, [question, allQuestionIds]);
 
   const handleOnboardingComplete = (data: { gender: string; age_group: string }) => {
-    localStorage.setItem('bals_user_info', JSON.stringify(data));
+    localStorage.setItem('upick_user_info', JSON.stringify(data));
     setUserInfo(data);
     setShowOnboarding(false);
   };
@@ -101,10 +101,10 @@ export default function VoteClient({
       setVotesB((prev) => prev + 1);
     }
 
-    const votedList = JSON.parse(localStorage.getItem('bals_voted_questions') || '[]');
+    const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
     if (!votedList.includes(question.id)) {
       votedList.push(question.id);
-      localStorage.setItem('bals_voted_questions', JSON.stringify(votedList));
+      localStorage.setItem('upick_voted_questions', JSON.stringify(votedList));
     }
 
     const gender = userInfo?.gender || '미선택';
@@ -130,7 +130,7 @@ export default function VoteClient({
     if (redirecting) return;
     setRedirecting(true);
 
-    const votedList = JSON.parse(localStorage.getItem('bals_voted_questions') || '[]');
+    const votedList = JSON.parse(localStorage.getItem('upick_voted_questions') || '[]');
     let unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id));
 
     if (question) {
@@ -148,7 +148,7 @@ export default function VoteClient({
 
   // Clear history to let them play again manually
   const handleResetHistory = () => {
-    localStorage.removeItem('bals_voted_questions');
+    localStorage.removeItem('upick_voted_questions');
     window.location.href = '/';
   };
 
@@ -198,7 +198,7 @@ export default function VoteClient({
             </div>
             <h2 className="text-2xl font-black mb-4">대단해요! 정복 완료 🎉</h2>
             <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-line mb-8">
-              BALS의 모든 질문에 답변하셨습니다!{"\n"}
+              UPICK의 모든 질문에 답변하셨습니다!{"\n"}
               여러분의 참여로 통계가 더욱 완벽해졌어요.{"\n\n"}
               더욱 기상천외하고 머리 아픈 질문들을 열심히 수집하고 있으니 잠시만 기다려주세요! 🙋‍♂️
             </p>
@@ -241,7 +241,7 @@ export default function VoteClient({
           <div className="relative h-44 w-96 overflow-hidden mb-2">
             <Image
               src="/logo.jpg"
-              alt="BALS Logo"
+              alt="UPICK Logo"
               fill
               className="object-contain"
               priority
