@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import OnboardingModal from './OnboardingModal';
 import StatsBottomSheet from './StatsBottomSheet';
+import ShareSheet from './ShareSheet';
 
 interface Question {
   id: string;
@@ -42,6 +43,7 @@ export default function VoteClient({
   const [votesA, setVotesA] = useState(initialVotesA);
   const [votesB, setVotesB] = useState(initialVotesB);
   const [showStats, setShowStats] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [noMoreQuestions, setNoMoreQuestions] = useState(false);
 
@@ -61,7 +63,6 @@ export default function VoteClient({
         setHasVoted(true);
       }
     } else if (allQuestionIds.length > 0) {
-      // Filter out already voted questions
       const unvotedIds = allQuestionIds.filter((id) => !votedList.includes(id));
       
       if (unvotedIds.length > 0) {
@@ -160,21 +161,6 @@ export default function VoteClient({
   const displayGrowA = total > 0 ? Math.max(30, Math.min(70, Math.round((votesA / total) * 100))) : 50;
   const displayGrowB = 100 - displayGrowA;
 
-  const handleShare = () => {
-    if (!question) return;
-    const url = `${window.location.origin}/?q=${question.id}`;
-    if (navigator.share) {
-      navigator.share({
-        title: `BALS - ${question.title}`,
-        url: url
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        alert('링크가 클립보드에 복사되었습니다!');
-      });
-    }
-  };
-
   if (serverError) {
     return (
       <div className="flex h-[100dvh] w-full flex-col items-center justify-center bg-zinc-950 text-white font-sans p-6 text-center">
@@ -195,28 +181,17 @@ export default function VoteClient({
     );
   }
 
-  // Witty completion screen when all questions have been voted on
+  // Witty completion screen when all questions have been voted on (Top Ad removed)
   if (noMoreQuestions) {
     return (
       <div className="relative flex h-[100dvh] w-full max-w-md mx-auto flex-col justify-between overflow-hidden bg-zinc-950 text-white font-sans">
-        {/* Top Ad */}
-        <div className="adsense-slot adsense-top flex justify-center bg-zinc-900/20 border-b border-zinc-900/50 shrink-0" style={{ minHeight: '100px', width: '100%' }}>
-          <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3522634980237009" crossOrigin="anonymous"></script>
-          <ins className="adsbygoogle"
-               style={{ display: 'block' }}
-               data-ad-client="ca-pub-3522634980237009"
-               data-ad-slot="8649404950"
-               data-ad-format="auto"
-               data-full-width-responsive="true"></ins>
-        </div>
-
         {/* Content area */}
         <div className="flex-1 flex flex-col justify-center items-center px-6 text-center py-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'spring', damping: 20 }}
-            className="flex flex-col items-center max-w-sm"
+            className="flex flex-col items-center max-w-sm animate-fade-in"
           >
             <div className="h-16 w-16 bg-neutral-900 border border-neutral-800 rounded-3xl flex items-center justify-center mb-6 shadow-xl">
               <Trophy className="h-8 w-8 text-yellow-500" />
@@ -238,7 +213,7 @@ export default function VoteClient({
         </div>
 
         {/* Terms and Privacy policy */}
-        <div className="text-[10px] text-center text-zinc-650 flex justify-center gap-3 py-1 border-t border-zinc-900/40 shrink-0">
+        <div className="text-[10px] text-center text-zinc-650 flex justify-center gap-3 py-2.5 border-t border-zinc-900/40 shrink-0">
           <Link href="/privacy" className="hover:text-zinc-400 hover:underline">개인정보처리방침</Link>
           <span>|</span>
           <Link href="/terms" className="hover:text-zinc-400 hover:underline">이용약관</Link>
@@ -258,12 +233,12 @@ export default function VoteClient({
     );
   }
 
-  // Large Prominent Logo in the main initial loading screen
+  // Full Screen Prominent Logo in the main initial loading screen
   if (!question) {
     return (
       <div className="flex h-[100dvh] w-full flex-col items-center justify-center bg-zinc-950 text-white font-sans p-6 text-center">
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative h-20 w-52 overflow-hidden mb-4">
+        <div className="flex flex-col items-center gap-8">
+          <div className="relative h-44 w-96 overflow-hidden mb-2">
             <Image
               src="/logo.jpg"
               alt="BALS Logo"
@@ -284,19 +259,8 @@ export default function VoteClient({
   return (
     <div className="relative flex h-[100dvh] w-full max-w-md mx-auto flex-col justify-between overflow-hidden bg-zinc-950 text-white font-sans select-none">
       
-      {/* 1. AdSense Top Slot */}
-      <div className="adsense-slot adsense-top flex justify-center bg-zinc-900/20 border-b border-zinc-900/50 shrink-0" style={{ minHeight: '100px', width: '100%' }}>
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3522634980237009" crossOrigin="anonymous"></script>
-        <ins className="adsbygoogle"
-             style={{ display: 'block' }}
-             data-ad-client="ca-pub-3522634980237009"
-             data-ad-slot="8649404950"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-      </div>
-
-      {/* 2. Simplified Top Navigation Bar (Logo Removed as per request) */}
-      <header className="flex items-center justify-center py-2 shrink-0 border-b border-zinc-900 bg-zinc-950/40">
+      {/* 2. Top Navigation Bar (AdSense top removed, Logo removed, Only category, maximized spacing) */}
+      <header className="flex items-center justify-center py-4 shrink-0 bg-zinc-950/20">
         {question.category && (
           <span className="inline-block rounded-full bg-zinc-900 px-3 py-1 text-xs font-bold text-zinc-400 tracking-widest uppercase border border-zinc-850">
             {question.category}
@@ -304,18 +268,18 @@ export default function VoteClient({
         )}
       </header>
 
-      {/* 3. Main Dynamic Content Area (Expanded to cover more vertical space) */}
-      <main className="flex-1 flex flex-col min-h-0 px-4 py-3 justify-between">
+      {/* 3. Main Dynamic Content Area (Expanded to occupy maximal vertical height) */}
+      <main className="flex-1 flex flex-col min-h-0 px-4 py-4 justify-between">
         
-        {/* Question Title Header - Large & Bold with minimized margins */}
-        <div className="text-center py-2 shrink-0">
+        {/* Question Title Header - Large & Bold */}
+        <div className="text-center py-3 shrink-0">
           <h1 className="text-2xl md:text-3xl font-extrabold leading-snug text-neutral-100 tracking-tight whitespace-pre-line px-2">
             {question.title}
           </h1>
         </div>
 
-        {/* Voting Stack Container (Takes maximum available screen space) */}
-        <div className="flex-grow flex flex-col gap-3 min-h-0 my-2 relative">
+        {/* Voting Stack Container (Takes maximum screen space) */}
+        <div className="flex-grow flex flex-col gap-4 min-h-0 my-3 relative">
           
           {/* Card Option A (Top) */}
           <motion.button
@@ -347,13 +311,13 @@ export default function VoteClient({
             )}
 
             <div className="relative z-10 flex flex-col items-center text-center w-full max-w-xs pointer-events-none">
-              <div className="flex items-center gap-2 mb-1 justify-center">
+              <div className="flex items-center gap-2 mb-1.5 justify-center">
                 {question.emoji_a && (
                   <span className="text-2xl leading-none">{question.emoji_a}</span>
                 )}
               </div>
               
-              <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-20 overflow-y-auto">
+              <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-24 overflow-y-auto">
                 {question.option_a}
               </p>
 
@@ -406,13 +370,13 @@ export default function VoteClient({
             )}
 
             <div className="relative z-10 flex flex-col items-center text-center w-full max-w-xs pointer-events-none">
-              <div className="flex items-center gap-2 mb-1 justify-center">
+              <div className="flex items-center gap-2 mb-1.5 justify-center">
                 {question.emoji_b && (
                   <span className="text-2xl leading-none">{question.emoji_b}</span>
                 )}
               </div>
 
-              <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-20 overflow-y-auto">
+              <p className="text-lg md:text-xl font-black leading-tight text-neutral-100 mb-1 max-h-24 overflow-y-auto">
                 {question.option_b}
               </p>
 
@@ -438,7 +402,7 @@ export default function VoteClient({
         </div>
 
         {/* Action Controls & Navigation (Post-Vote) */}
-        <div className="h-16 shrink-0 flex items-center justify-between gap-3 mt-1.5">
+        <div className="h-16 shrink-0 flex items-center justify-between gap-3 mt-2">
           {hasVoted ? (
             <>
               <motion.button
@@ -472,7 +436,7 @@ export default function VoteClient({
           )}
           
           <button
-            onClick={handleShare}
+            onClick={() => setShowShareSheet(true)}
             className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-3 h-12 w-12 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition text-zinc-400 shadow-md shrink-0"
             title="공유하기"
           >
@@ -482,8 +446,8 @@ export default function VoteClient({
 
       </main>
 
-      {/* Tiny Legal Footer (Pushed to the very bottom above bottom AdSlot, no scroll trigger) */}
-      <div className="text-[10px] text-center text-zinc-650 flex justify-center gap-3 py-1 border-t border-zinc-900/40 shrink-0">
+      {/* Tiny Legal Footer (Pushed to the very bottom above bottom AdSlot) */}
+      <div className="text-[10px] text-center text-zinc-650 flex justify-center gap-3 py-2.5 border-t border-zinc-900/40 shrink-0">
         <Link href="/privacy" className="hover:text-zinc-400 hover:underline">개인정보처리방침</Link>
         <span>|</span>
         <Link href="/terms" className="hover:text-zinc-400 hover:underline">이용약관</Link>
@@ -508,6 +472,13 @@ export default function VoteClient({
           <StatsBottomSheet
             questionId={question.id}
             onClose={() => setShowStats(false)}
+          />
+        )}
+        {showShareSheet && question && (
+          <ShareSheet
+            onClose={() => setShowShareSheet(false)}
+            shareUrl={`${window.location.origin}/?q=${question.id}`}
+            questionTitle={question.title}
           />
         )}
       </AnimatePresence>

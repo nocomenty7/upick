@@ -189,19 +189,6 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
                 ))}
               </div>
             </div>
-
-            {/* AdSense Middle Slot */}
-            <div className="pt-4 border-t border-neutral-800 flex justify-center">
-              <div className="adsense-slot adsense-middle" style={{ minHeight: '250px', width: '100%', margin: '10px 0' }}>
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3522634980237009" crossOrigin="anonymous"></script>
-                <ins className="adsbygoogle"
-                     style={{ display: 'block' }}
-                     data-ad-client="ca-pub-3522634980237009"
-                     data-ad-slot="8623308627"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-              </div>
-            </div>
           </div>
         ) : (
           <div className="text-center py-10 text-neutral-500 font-bold flex-1">통계 데이터를 불러올 수 없습니다.</div>
