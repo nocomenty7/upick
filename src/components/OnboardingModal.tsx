@@ -34,15 +34,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
       >
         {/* Brand Header */}
         <div className="mb-5 flex flex-col items-center">
-          <div className="relative h-14 w-36 mb-2 overflow-hidden">
-            <Image
-              src="/logo.jpg"
-              alt="BALS Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
+          <h2 className="text-3xl font-black tracking-tight mb-1 bg-gradient-to-r from-neutral-100 to-neutral-400 bg-clip-text text-transparent">BALS</h2>
           <p className="text-xs text-neutral-400">간단한 프로필을 선택하고 밸런스 게임을 즐겨보세요</p>
         </div>
 

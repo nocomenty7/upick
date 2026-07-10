@@ -72,7 +72,6 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
           }
         });
 
-        // Compute percentages to 1 decimal place
         const malePercent = totalVotes > 0 ? Number(((male / totalVotes) * 100).toFixed(1)) : 50.0;
         const femalePercent = Number((100 - malePercent).toFixed(1));
 
@@ -107,12 +106,13 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-        className="relative z-10 w-full max-w-md rounded-t-3xl bg-neutral-900/98 border-t border-neutral-800 p-6 text-white shadow-2xl backdrop-blur-xl flex flex-col max-h-[85dvh] overflow-y-auto"
+        className="relative z-10 w-full max-w-md rounded-t-3xl bg-neutral-900/98 border-t border-neutral-800 p-6 text-white shadow-2xl backdrop-blur-xl flex flex-col max-h-[80dvh] overflow-hidden"
       >
-        {/* Header indicator */}
-        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-neutral-700 cursor-pointer" onClick={onClose} />
+        {/* Fixed Header Indicator */}
+        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-neutral-700 cursor-pointer shrink-0" onClick={onClose} />
 
-        <div className="mb-6 flex items-center justify-between">
+        {/* Fixed Title Header */}
+        <div className="mb-5 flex items-center justify-between shrink-0">
           <h3 className="text-2xl font-black tracking-tight flex items-center gap-2">
             <Users className="h-6 w-6 text-neutral-400" />
             상세 통계 내용
@@ -125,13 +125,14 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
           </button>
         </div>
 
+        {/* Scrollable Content Container */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="flex flex-col items-center justify-center py-20 gap-3 flex-1">
             <span className="h-9 w-9 animate-spin rounded-full border-4 border-t-transparent border-neutral-600" />
             <p className="text-sm text-neutral-500 font-semibold">통계 데이터를 불러오는 중...</p>
           </div>
         ) : stats ? (
-          <div className="space-y-7">
+          <div className="flex-1 overflow-y-auto space-y-6 pr-1 pb-4 min-h-0">
             {/* Stats Overview */}
             <div className="text-center bg-neutral-850 border border-neutral-800 rounded-2xl py-4 px-6">
               <span className="text-xs text-neutral-400 block mb-0.5 font-bold uppercase tracking-wider">전체 참여자 수</span>
@@ -145,13 +146,11 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
                 <PieChart className="h-5 w-5 text-neutral-400" /> 성별 비율
               </h4>
               
-              {/* Header metrics showing both male & female even at 0.0% */}
               <div className="flex justify-between items-center text-sm font-black px-1">
                 <span className="text-sky-400">🙋‍♂️ 남성 {stats.gender.malePercent.toFixed(1)}%</span>
                 <span className="text-rose-400">🙋‍♀️ 여성 {stats.gender.femalePercent.toFixed(1)}%</span>
               </div>
 
-              {/* Seamless Combined Segmented Progress Bar */}
               <div className="relative flex h-3.5 w-full overflow-hidden rounded-full bg-zinc-800 shadow-inner">
                 {stats.gender.malePercent > 0 && (
                   <div
@@ -205,7 +204,7 @@ export default function StatsBottomSheet({ questionId, onClose }: StatsBottomShe
             </div>
           </div>
         ) : (
-          <div className="text-center py-10 text-neutral-500 font-bold">통계 데이터를 불러올 수 없습니다.</div>
+          <div className="text-center py-10 text-neutral-500 font-bold flex-1">통계 데이터를 불러올 수 없습니다.</div>
         )}
       </motion.div>
     </div>
