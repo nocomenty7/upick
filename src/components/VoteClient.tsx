@@ -36,7 +36,17 @@ export default function VoteClient({
   allQuestions,
   serverError
 }: VoteClientProps) {
-  const [userInfo, setUserInfo] = useState<{ gender: string; age_group: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<{ gender: string; age_group: string } | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('upick_user_info');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+    }
+    return null;
+  });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOption, setSelectedOption] = useState<'A' | 'B' | null>(null);
@@ -55,7 +65,24 @@ export default function VoteClient({
   const [voteCooldown, setVoteCooldown] = useState(true);
 
   // CATEGORY FILTER STATE (Multi-select)
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['전체']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('upick_filter_categories');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+    }
+    return ['전체'];
+  });
+
+  const getCategoryCount = (catName: string): number => {
+    if (catName === '전체') {
+      return allQuestions.length;
+    }
+    return allQuestions.filter(q => q.category?.trim() === catName).length;
+  };
 
   const categoriesConfig = [
     { name: '전체', activeClass: 'border-white bg-white text-zinc-950', inactiveClass: 'border-zinc-800 bg-zinc-900/50 text-neutral-400 hover:border-zinc-700' },
@@ -134,13 +161,6 @@ export default function VoteClient({
     return () => clearTimeout(timer);
   }, [question]);
 
-  // Load category filters from local storage or default
-  useEffect(() => {
-    const savedCats = localStorage.getItem('upick_filter_categories');
-    if (savedCats) {
-      setSelectedCategories(JSON.parse(savedCats));
-    }
-  }, []);
 
   // Save category filters on state change
   const updateSelectedCategories = (cats: string[]) => {
@@ -821,6 +841,7 @@ export default function VoteClient({
                   <div className="mb-3">
                     {categoriesConfig.filter(c => c.name === '전체').map((cat) => {
                       const isActive = selectedCategories.includes(cat.name);
+                      const count = getCategoryCount(cat.name);
                       return (
                         <button
                           key={cat.name}
@@ -829,7 +850,7 @@ export default function VoteClient({
                             isActive ? cat.activeClass : cat.inactiveClass
                           }`}
                         >
-                          {cat.name}
+                          {cat.name} ({count})
                         </button>
                       );
                     })}
@@ -839,6 +860,7 @@ export default function VoteClient({
                   <div className="flex flex-wrap gap-2">
                     {categoriesConfig.filter(c => c.name !== '전체').map((cat) => {
                       const isActive = selectedCategories.includes(cat.name);
+                      const count = getCategoryCount(cat.name);
                       return (
                         <button
                           key={cat.name}
@@ -847,7 +869,7 @@ export default function VoteClient({
                             isActive ? cat.activeClass : cat.inactiveClass
                           }`}
                         >
-                          {cat.name}
+                          {cat.name} ({count})
                         </button>
                       );
                     })}
