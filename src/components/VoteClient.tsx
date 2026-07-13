@@ -832,6 +832,35 @@ export default function VoteClient({
                       );
                     })}
                   </div>
+                  <span className="text-[10px] text-neutral-500 font-semibold block mt-3">
+                    💡 다음 질문부터 필터가 적용됩니다.
+                  </span>
+                </div>
+
+                {/* Additional Trust Links Inside Drawer */}
+                <div className="border-t border-zinc-900/80 pt-4 flex flex-col gap-2">
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest block mb-1">법률 및 지원</span>
+                  <Link
+                    href="/terms"
+                    onClick={() => setShowDrawer(false)}
+                    className="flex items-center gap-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-900 p-3 text-xs font-extrabold text-neutral-250 transition-all hover:border-zinc-800"
+                  >
+                    <span>이용약관</span>
+                  </Link>
+                  <Link
+                    href="/privacy"
+                    onClick={() => setShowDrawer(false)}
+                    className="flex items-center gap-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-900 p-3 text-xs font-extrabold text-neutral-250 transition-all hover:border-zinc-800"
+                  >
+                    <span>개인정보처리방침</span>
+                  </Link>
+                  <a
+                    href="mailto:nocomenty7@gmail.com"
+                    onClick={() => setShowDrawer(false)}
+                    className="flex items-center gap-3 rounded-2xl bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-900 p-3 text-xs font-extrabold text-neutral-250 transition-all hover:border-zinc-800"
+                  >
+                    <span>문의하기</span>
+                  </a>
                 </div>
               </div>
 
