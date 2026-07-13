@@ -35,6 +35,7 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
     if (typeof window !== 'undefined') {
       const Kakao = (window as any).Kakao;
       if (Kakao && Kakao.isInitialized()) {
+        const currentUrl = window.location.href;
         Kakao.Share.sendDefault({
           objectType: 'feed',
           content: {
@@ -42,16 +43,16 @@ export default function ShareSheet({ onClose, shareUrl, questionTitle }: ShareSh
             description: questionTitle,
             imageUrl: 'https://upick.kr/og-image.png',
             link: {
-              mobileWebUrl: shareUrl,
-              webUrl: shareUrl,
+              mobileWebUrl: currentUrl,
+              webUrl: currentUrl,
             },
           },
           buttons: [
             {
               title: '게임하러 가기',
               link: {
-                mobileWebUrl: shareUrl,
-                webUrl: shareUrl,
+                mobileWebUrl: currentUrl,
+                webUrl: currentUrl,
               },
             },
           ],
