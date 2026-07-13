@@ -130,7 +130,7 @@ function LandingClient() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-2xl md:text-3xl font-black leading-snug tracking-tight text-neutral-100 px-2"
+            className="text-3xl md:text-4xl lg:text-5xl font-black leading-snug tracking-tight text-neutral-100 px-2"
           >
             당신의 취향은 다수? 소수?
             <br />
@@ -206,19 +206,6 @@ function LandingClient() {
             성별, 연령대별 실시간 통계 분석을 통해 타인과의 가치관 싱크율을 체크합니다.
           </motion.p>
 
-          {/* Hero Gameplay Image Preview */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="relative w-full max-w-lg mx-auto rounded-3xl overflow-hidden border border-zinc-800/80 bg-zinc-950/40 p-1.5 shadow-[0_0_40px_rgba(99,102,241,0.15)] group"
-          >
-            <img
-              src="/hero-preview.png"
-              alt="UPick Gameplay Preview"
-              className="w-full h-auto object-cover rounded-2xl transition-all duration-500 group-hover:scale-[1.01]"
-            />
-          </motion.div>
         </section>
 
         {/* Vercel Style Spacious Feature Cards */}
