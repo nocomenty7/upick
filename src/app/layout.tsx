@@ -70,6 +70,13 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3522634980237009"
           crossOrigin="anonymous"
         />
+        {/* Kakao JavaScript SDK */}
+        <script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.8.1/kakao.min.js"
+          integrity="sha384-OL+ylM/iuPLtW5U3XcvLSGhE8JzReKDank5InqlHGWPhb4140/yrBw0bg0y7+C9J"
+          crossOrigin="anonymous"
+          async
+        />
       </head>
       <body className="min-h-full bg-[#080911] text-white antialiased">
         {/* Google Analytics (GA4) Script */}
