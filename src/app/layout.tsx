@@ -3,14 +3,14 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "UPick - 세상의 모든 선택과 밸런스 게임",
-  description: "연애, 음식, 일상, 상상력 등 의 도파민 터지는 밸런스 게임! 당신의 숨겨진 취향과 한계를 테스트해 보세요.",
+  title: "UPick (유픽) - 세상의 모든 극한 밸런스게임과 취향 분석 테스트",
+  description: "로그인이나 회원가입 없이 0초 만에 즐기는 초간단 밸런스게임! 연애, 음식, 일상, 스타일, 상상력 등 8가지 카테고리의 200개가 넘는 극한 딜레마를 선택하고 성별·연령대별 실시간 통계 분석 결과로 당신의 진짜 취향을 테스트해 보세요.",
   icons: {
     icon: "/favicon.ico",
   },
   openGraph: {
-    title: "UPick - 세상의 모든 선택과 밸런스 게임",
-    description: "연애, 음식, 일상, 상상력 등 의 도파민 터지는 밸런스 게임! 당신의 숨겨진 취향과 한계를 테스트해 보세요.",
+    title: "UPick (유픽) - 세상의 모든 극한 밸런스게임과 취향 분석 테스트",
+    description: "로그인이나 회원가입 없이 0초 만에 즐기는 초간단 밸런스게임! 연애, 음식, 일상, 스타일, 상상력 등 8가지 카테고리의 200개가 넘는 극한 딜레마를 선택하고 성별·연령대별 실시간 통계 분석 결과로 당신의 진짜 취향을 테스트해 보세요.",
     url: "https://upick.kr",
     siteName: "UPick",
     images: [
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "UPick - 세상의 모든 선택과 밸런스 게임",
-    description: "연애, 음식, 일상, 상상력 등 의 도파민 터지는 밸런스 게임! 당신의 숨겨진 취향과 한계를 테스트해 보세요.",
+    title: "UPick (유픽) - 세상의 모든 극한 밸런스게임과 취향 분석 테스트",
+    description: "로그인이나 회원가입 없이 0초 만에 즐기는 초간단 밸런스게임! 연애, 음식, 일상, 스타일, 상상력 등 8가지 카테고리의 200개가 넘는 극한 딜레마를 선택하고 성별·연령대별 실시간 통계 분석 결과로 당신의 진짜 취향을 테스트해 보세요.",
     images: ["https://upick.kr/og-image.png"],
   },
 };
