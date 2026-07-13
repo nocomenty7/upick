@@ -799,7 +799,7 @@ export default function VoteClient({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowDrawer(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/75"
             />
 
             {/* Drawer Content */}
@@ -808,7 +808,7 @@ export default function VoteClient({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="relative z-10 w-4/5 max-w-xs h-full bg-[#080911]/98 border-l border-zinc-900 p-6 flex flex-col justify-between text-white shadow-2xl backdrop-blur-xl"
+              className="relative z-10 w-4/5 max-w-xs h-full bg-[#0c0d1b] border-l border-zinc-900 p-6 flex flex-col justify-between text-white shadow-2xl"
             >
               <div className="space-y-6 overflow-y-auto max-h-[85vh] pr-1">
                 {/* Header Inside Drawer */}

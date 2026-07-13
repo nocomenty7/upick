@@ -189,7 +189,10 @@ function LandingClient() {
             <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#080911] to-transparent z-10 pointer-events-none" />
 
             {/* Row 1 - Slide Left */}
-            <div className="flex gap-4 animate-marquee whitespace-nowrap">
+            <div 
+              className="flex gap-4 animate-marquee whitespace-nowrap"
+              style={{ animationPlayState: showDrawer ? 'paused' : 'running' }}
+            >
               {[...sampleDilemmasRow1, ...sampleDilemmasRow1].map((dil, idx) => (
                 <div key={idx} className="inline-flex items-center gap-2 rounded-2xl border border-zinc-900 bg-zinc-950/60 px-4 py-3 text-xs md:text-sm font-extrabold text-neutral-200 shadow-md">
                   <span className="text-zinc-500 font-normal">{dil.cat}</span>
@@ -201,7 +204,10 @@ function LandingClient() {
             </div>
 
             {/* Row 2 - Slide Right */}
-            <div className="flex gap-4 animate-marquee-reverse whitespace-nowrap">
+            <div 
+              className="flex gap-4 animate-marquee-reverse whitespace-nowrap"
+              style={{ animationPlayState: showDrawer ? 'paused' : 'running' }}
+            >
               {[...sampleDilemmasRow2, ...sampleDilemmasRow2].map((dil, idx) => (
                 <div key={idx} className="inline-flex items-center gap-2 rounded-2xl border border-zinc-900 bg-zinc-950/60 px-4 py-3 text-xs md:text-sm font-extrabold text-neutral-200 shadow-md">
                   <span className="text-zinc-500 font-normal">{dil.cat}</span>
@@ -349,14 +355,14 @@ function LandingClient() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowDrawer(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/75"
             />
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="relative z-10 w-4/5 max-w-xs h-full bg-[#080911]/98 border-l border-zinc-900 p-6 flex flex-col justify-between text-white shadow-2xl backdrop-blur-xl"
+              className="relative z-10 w-4/5 max-w-xs h-full bg-[#0c0d1b] border-l border-zinc-900 p-6 flex flex-col justify-between text-white shadow-2xl"
             >
               <div className="space-y-6 overflow-y-auto max-h-[85vh] pr-1">
                 {/* Header Inside Drawer */}
